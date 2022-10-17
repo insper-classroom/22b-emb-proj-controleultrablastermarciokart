@@ -6,13 +6,13 @@ import pyvjoy # Windows apenas
 
 class MyControllerMap:
     def __init__(self):
-        self.button = {'A': 1 , 'B' : 2 , 'X': 3 , 'Z': 4}
+        self.button = {'A': 1 , 'B' : 2 , 'X': 3 , 'Z': 4, 'LEFT': 5 , 'RIGHT': 6}
 
 class SerialControllerInterface:
 
     # //                PROTOCOLO
 	# // ----------------------------------------------
-	# // tipo de dado -> A (analogico) D (Digital)
+	# // tipo de dado -> A (analogico) D (Digital) I (IMU)
 	# // id_botão     -> botão azul 'A'   botão verde 'B'
 	# // status botão -> '1' pressionado  '0' soltou
 	
@@ -56,6 +56,18 @@ class SerialControllerInterface:
             logging.info("Para")
             self.j.set_button(self.mapping.button['X'], 0)
             self.j.set_button(self.mapping.button['Z'], 0)
+    
+    def input_imu_action(self,speed_state):
+        if(speed_state == 'r'):
+            logging.info("\nRight\n")
+            self.j.set_button(self.mapping.button['RIGHT'], 1)  
+        elif(speed_state == 'l'):
+            logging.info("\nLeft\n")
+            self.j.set_button(self.mapping.button['LEFT'], 1)
+        else:
+            logging.info("Para")
+            self.j.set_button(self.mapping.button['RIGHT'], 0)
+            self.j.set_button(self.mapping.button['LEFT'], 0)
 
     def input_digital_action(self,buttonId, status):
         logging.info("Pressing \t")
@@ -101,6 +113,16 @@ class SerialControllerInterface:
                 self.input_analog_action('d')
             elif(id_state == b's'):
                 self.input_analog_action('s')
+
+        # IMU value
+        if data_type == b'I':
+            print(id_state)
+            if(id_state == b'r'):
+                self.input_imu_action('r')
+            elif(id_state == b'l'):
+                self.input_imu_action('l')
+            elif(id_state == b's'):
+                self.input_imu_action('s')
                 
         self.incoming = self.ser.read()
 

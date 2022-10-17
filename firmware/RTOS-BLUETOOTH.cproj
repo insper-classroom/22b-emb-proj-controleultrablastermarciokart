@@ -36,12 +36,15 @@
     <option id="common.services.delay" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.basic.gpio" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.ioport" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="common.services.basic.twihs" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.utils.stdio.stdio_serial" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="sam.drivers.afec" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.drivers.mpu" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.drivers.pio" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="sam.drivers.rtt" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.drivers.tc" value="Add" config="" content-id="Atmel.ASF" />
     <option id="thirdparty.os.freertos.version" value="Add" config="8.2.3" content-id="Atmel.ASF" />
-    <option id="sam.drivers.afec" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="common.components.touch.mxt" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.freertos.sam_example" value="Add" config="" content-id="Atmel.ASF" />
     <option id="sam.utils.cmsis.same70.source.template" value="Add" config="" content-id="Atmel.ASF" />
   </options>
@@ -278,6 +281,17 @@
     <file path="src/ASF/common/services/sleepmgr/sleepmgr.h" framework="" version="3.44.1" source="common\services\sleepmgr\sleepmgr.h" changed="False" content-id="Atmel.ASF" />
     <file path="src/ASF/common/services/sleepmgr/sam/sleepmgr.h" framework="" version="3.44.1" source="common\services\sleepmgr\sam\sleepmgr.h" changed="False" content-id="Atmel.ASF" />
     <file path="src/Config/conf_sleepmgr.h" framework="" version="3.44.1" source="common\services\sleepmgr\sam\module_config\conf_sleepmgr.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/sam/drivers/rtt/rtt.c" framework="" version="3.44.1" source="sam\drivers\rtt\rtt.c" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/sam/drivers/rtt/rtt.h" framework="" version="3.44.1" source="sam\drivers\rtt\rtt.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/sam/drivers/twihs/twihs.c" framework="" version="3.44.1" source="sam\drivers\twihs\twihs.c" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/sam/drivers/twihs/twihs.h" framework="" version="3.44.1" source="sam\drivers\twihs\twihs.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/twi/sam_twihs/twihs_master.h" framework="" version="3.44.1" source="common\services\twi\sam_twihs\twihs_master.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/twi/twihs_master.h" framework="" version="3.44.1" source="common\services\twi\twihs_master.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/twi/sam_twihs/twihs_slave.h" framework="" version="3.44.1" source="common\services\twi\sam_twihs\twihs_slave.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/services/twi/twihs_slave.h" framework="" version="3.44.1" source="common\services\twi\twihs_slave.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/components/touch/mxt/mxt_device_1.c" framework="" version="3.44.1" source="common\components\touch\mxt\mxt_device_1.c" changed="False" content-id="Atmel.ASF" />
+    <file path="src/ASF/common/components/touch/mxt/mxt_device_1.h" framework="" version="3.44.1" source="common\components\touch\mxt\mxt_device_1.h" changed="False" content-id="Atmel.ASF" />
+    <file path="src/Config/conf_mxt.h" framework="" version="3.44.1" source="common\components\touch\mxt\module_config\conf_mxt.h" changed="False" content-id="Atmel.ASF" />
   </files>
   <documentation help="http://asf.atmel.com/docs/3.35.1/common.services.freertos.sam_example.same70_xplained/html/index.html" />
   <offline-documentation help="" />
@@ -357,6 +371,10 @@
       <Value>../src/ASF/sam/drivers/tc</Value>
       <Value>../src/ASF/sam/drivers/afec</Value>
       <Value>../src/ASF/common/services/sleepmgr</Value>
+      <Value>../src/ASF/sam/drivers/rtt</Value>
+      <Value>../src/ASF/sam/drivers/twihs</Value>
+      <Value>../src/ASF/common/services/twi</Value>
+      <Value>../src/ASF/common/components/touch/mxt</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize most (-O3)</armgcc.compiler.optimization.level>
@@ -410,6 +428,10 @@
       <Value>../src/ASF/sam/drivers/tc</Value>
       <Value>../src/ASF/sam/drivers/afec</Value>
       <Value>../src/ASF/common/services/sleepmgr</Value>
+      <Value>../src/ASF/sam/drivers/rtt</Value>
+      <Value>../src/ASF/sam/drivers/twihs</Value>
+      <Value>../src/ASF/common/services/twi</Value>
+      <Value>../src/ASF/common/components/touch/mxt</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
   <armgcc.preprocessingassembler.general.AssemblerFlags>-DARM_MATH_CM7=true -DBOARD=SAME70_XPLAINED -D__FREERTOS__ -D__SAME70Q21__ -Dprintf=iprintf -Dscanf=iscanf</armgcc.preprocessingassembler.general.AssemblerFlags>
@@ -446,6 +468,10 @@
       <Value>../src/ASF/sam/drivers/tc</Value>
       <Value>../src/ASF/sam/drivers/afec</Value>
       <Value>../src/ASF/common/services/sleepmgr</Value>
+      <Value>../src/ASF/sam/drivers/rtt</Value>
+      <Value>../src/ASF/sam/drivers/twihs</Value>
+      <Value>../src/ASF/common/services/twi</Value>
+      <Value>../src/ASF/common/components/touch/mxt</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
 </ArmGcc>
@@ -464,7 +490,6 @@
       <Value>DEBUG</Value>
       <Value>BOARD=SAME70_XPLAINED</Value>
       <Value>ARM_MATH_CM7=true</Value>
-      <Value>printf=iprintf</Value>
       <Value>__FREERTOS__</Value>
       <Value>__SAME70Q21__</Value>
       <Value>scanf=iscanf</Value>
@@ -503,6 +528,10 @@
       <Value>../src/ASF/sam/drivers/tc</Value>
       <Value>../src/ASF/sam/drivers/afec</Value>
       <Value>../src/ASF/common/services/sleepmgr</Value>
+      <Value>../src/ASF/sam/drivers/rtt</Value>
+      <Value>../src/ASF/sam/drivers/twihs</Value>
+      <Value>../src/ASF/common/services/twi</Value>
+      <Value>../src/ASF/common/components/touch/mxt</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
@@ -558,6 +587,10 @@
       <Value>../src/ASF/sam/drivers/tc</Value>
       <Value>../src/ASF/sam/drivers/afec</Value>
       <Value>../src/ASF/common/services/sleepmgr</Value>
+      <Value>../src/ASF/sam/drivers/rtt</Value>
+      <Value>../src/ASF/sam/drivers/twihs</Value>
+      <Value>../src/ASF/common/services/twi</Value>
+      <Value>../src/ASF/common/components/touch/mxt</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
   <armgcc.assembler.debugging.DebugLevel>Default (-g)</armgcc.assembler.debugging.DebugLevel>
@@ -595,6 +628,10 @@
       <Value>../src/ASF/sam/drivers/tc</Value>
       <Value>../src/ASF/sam/drivers/afec</Value>
       <Value>../src/ASF/common/services/sleepmgr</Value>
+      <Value>../src/ASF/sam/drivers/rtt</Value>
+      <Value>../src/ASF/sam/drivers/twihs</Value>
+      <Value>../src/ASF/common/services/twi</Value>
+      <Value>../src/ASF/common/components/touch/mxt</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
   <armgcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcc.preprocessingassembler.debugging.DebugLevel>
@@ -606,6 +643,9 @@
     <Folder Include="src\ASF\" />
     <Folder Include="src\ASF\common\" />
     <Folder Include="src\ASF\common\boards\" />
+    <Folder Include="src\ASF\common\components\" />
+    <Folder Include="src\ASF\common\components\touch\" />
+    <Folder Include="src\ASF\common\components\touch\mxt\" />
     <Folder Include="src\ASF\common\services\" />
     <Folder Include="src\ASF\common\services\clock\" />
     <Folder Include="src\ASF\common\services\clock\same70\" />
@@ -619,6 +659,8 @@
     <Folder Include="src\ASF\common\services\serial\sam_uart\" />
     <Folder Include="src\ASF\common\services\sleepmgr\" />
     <Folder Include="src\ASF\common\services\sleepmgr\sam\" />
+    <Folder Include="src\ASF\common\services\twi\" />
+    <Folder Include="src\ASF\common\services\twi\sam_twihs\" />
     <Folder Include="src\ASF\common\utils\" />
     <Folder Include="src\ASF\common\utils\interrupt\" />
     <Folder Include="src\ASF\common\utils\stdio\" />
@@ -631,7 +673,9 @@
     <Folder Include="src\ASF\sam\drivers\mpu\" />
     <Folder Include="src\ASF\sam\drivers\pio\" />
     <Folder Include="src\ASF\sam\drivers\pmc\" />
+    <Folder Include="src\ASF\sam\drivers\rtt\" />
     <Folder Include="src\ASF\sam\drivers\tc\" />
+    <Folder Include="src\ASF\sam\drivers\twihs\" />
     <Folder Include="src\ASF\sam\drivers\uart\" />
     <Folder Include="src\ASF\sam\drivers\usart\" />
     <Folder Include="src\ASF\sam\utils\" />
@@ -669,8 +713,24 @@
     <Folder Include="src\ASF\thirdparty\freertos\freertos-8.2.3\Source\portable\GCC\ARM_CM7\r0p1\" />
     <Folder Include="src\ASF\thirdparty\freertos\freertos-8.2.3\Source\portable\MemMang\" />
     <Folder Include="src\config\" />
+    <Folder Include="src\fusion" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\ASF\common\components\touch\mxt\mxt_device_1.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\common\components\touch\mxt\mxt_device_1.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\config\conf_mxt.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\mcu6050.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\mpu6050.h">
+      <SubType>compile</SubType>
+    </Compile>
     <None Include="src\asf.h">
       <SubType>compile</SubType>
     </None>
@@ -1217,6 +1277,18 @@
     <None Include="src\ASF\common\services\sleepmgr\sam\sleepmgr.h">
       <SubType>compile</SubType>
     </None>
+    <None Include="src\ASF\common\services\twi\sam_twihs\twihs_master.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\common\services\twi\twihs_master.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\common\services\twi\sam_twihs\twihs_slave.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\common\services\twi\twihs_slave.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\ASF\common\utils\interrupt\interrupt_sam_nvic.c">
       <SubType>compile</SubType>
     </Compile>
@@ -1259,10 +1331,22 @@
     <Compile Include="src\ASF\sam\drivers\pmc\sleep.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\ASF\sam\drivers\rtt\rtt.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam\drivers\rtt\rtt.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\ASF\sam\drivers\tc\tc.c">
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\ASF\sam\drivers\tc\tc.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\sam\drivers\twihs\twihs.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam\drivers\twihs\twihs.h">
       <SubType>compile</SubType>
     </None>
     <Compile Include="src\ASF\sam\drivers\uart\uart.c">
@@ -1316,6 +1400,39 @@
     <None Include="src\config\conf_sleepmgr.h">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="src\bme280.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fusion\Fusion.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fusion\FusionAhrs.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fusion\FusionAhrs.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fusion\FusionAxes.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fusion\FusionCalibration.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fusion\FusionCompass.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fusion\FusionCompass.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fusion\FusionMath.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fusion\FusionOffset.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\fusion\FusionOffset.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\main.c">
       <SubType>compile</SubType>
     </Compile>
@@ -1323,6 +1440,9 @@
       <SubType>compile</SubType>
     </None>
     <None Include="src\ASF\thirdparty\freertos\freertos-8.2.3\Source\readme.txt">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\fusion\CMakeLists.txt">
       <SubType>compile</SubType>
     </None>
   </ItemGroup>
