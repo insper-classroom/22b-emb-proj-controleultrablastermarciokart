@@ -58,6 +58,10 @@ class SerialControllerInterface:
             self.j.set_button(self.mapping.button['Z'], 0)
     
     def input_imu_action(self,speed_state):
+        print("------\n")
+        print('\n >> IMU\n')
+        print(speed_state);
+        print("------\n")
         if(speed_state == 'r'):
             logging.info("\nRight\n")
             self.j.set_button(self.mapping.button['RIGHT'], 1)  
@@ -116,6 +120,7 @@ class SerialControllerInterface:
 
         # IMU value
         if data_type == b'I':
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             print(id_state)
             if(id_state == b'r'):
                 self.input_imu_action('r')

@@ -144,7 +144,7 @@ void but1_callback(void)
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	
 	// Borda subida (Apertou):
-	if(pio_get(BUT1_PIO, PIO_INPUT, BUT1_IDX_MASK)){
+	if(!pio_get(BUT1_PIO, PIO_INPUT, BUT1_IDX_MASK)){
 		xQueueSendFromISR(xQueueKeyDown, &butId , &xHigherPriorityTaskWoken);
 	}else{
 		// Borda de descida (Soltou):
@@ -159,7 +159,7 @@ void but2_callback(void)
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	
 	// Borda subida (Apertou):
-	if(pio_get(BUT2_PIO, PIO_INPUT, BUT2_IDX_MASK)){
+	if(!pio_get(BUT2_PIO, PIO_INPUT, BUT2_IDX_MASK)){
 		xQueueSendFromISR(xQueueKeyDown, &butId , &xHigherPriorityTaskWoken);
 	}else{
 		// Borda de descida (Soltou):
@@ -293,9 +293,9 @@ void buts_config(void){
 	
 	
 	// Inicializando botoes como entrada , configurando debounce
-	pio_configure(BUTONOFF_PIO, PIO_INPUT, BUTONOFF_IDX_MASK,  PIO_DEBOUNCE);
-	pio_configure(BUT1_PIO, PIO_INPUT, BUT1_IDX_MASK,  PIO_DEBOUNCE);
-	pio_configure(BUT2_PIO, PIO_INPUT, BUT2_IDX_MASK,  PIO_DEBOUNCE);
+	pio_configure(BUTONOFF_PIO, PIO_INPUT, BUTONOFF_IDX_MASK,  PIO_PULLUP | PIO_DEBOUNCE);
+	pio_configure(BUT1_PIO, PIO_INPUT, BUT1_IDX_MASK,  PIO_PULLUP | PIO_DEBOUNCE);
+	pio_configure(BUT2_PIO, PIO_INPUT, BUT2_IDX_MASK, PIO_PULLUP |  PIO_DEBOUNCE);
 	
 	// Aplicando filtro debounce
 	pio_set_debounce_filter(BUTONOFF_PIO, BUTONOFF_IDX_MASK, 80);
@@ -646,15 +646,15 @@ void task_imu(void){
 // 		printf("Roll: %f\n", euler.angle.roll);
 // 		
 	
-		if( euler.angle.roll > 15){
+		if( euler.angle.roll > 30){
 			
-			if(state != 'r'){
+			if(state != 'r'){ 
 				//printf("Direita!\n");
 				send = 1;
 				state = 'r';
 			}
 			
-			}else if(euler.angle.roll < -15){
+			}else if(euler.angle.roll < -30){
 			
 			if(state != 'l'){
 				//printf("Esquerda!\n");
@@ -795,7 +795,7 @@ void task_main(void) {
 		if(xQueueReceive(xQueueIMU, &rotation_state, 0)){
 			if(handshake == '1'){
 				send_package('I', rotation_state , '0');
-				printf("Enviei rotação\n");
+				//printf("Enviei rotação\n");
 			}
 		}
 		
