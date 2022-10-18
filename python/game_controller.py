@@ -6,7 +6,9 @@ import pyvjoy # Windows apenas
 
 class MyControllerMap:
     def __init__(self):
-        self.button = {'A': 1 , 'B' : 2 , 'X': 3 , 'Z': 4}
+        # M -> Menu
+        # E , D  , C , B -> Esquerda , Direita , Cima , Baixo
+        self.button = {'A': 1 , 'B' : 2 , 'X': 3 , 'Z': 4 , 'ENTER': 5 , 'ME': 6 , 'MD':7 , 'MC':8, 'MB':9}
 
 class SerialControllerInterface:
 
@@ -21,6 +23,12 @@ class SerialControllerInterface:
 	# // tipo = 'H'
 	# // id_botao = '0'
 	# // status = '0' (pedido para desligar conexao) , status = '1' pedido para ligar conexao
+
+    # //                VJOY DATA
+	# // ---------------------------------------------
+	# // tipo = 'J'
+	# // id_botao = info eixo x
+	# // status = info eixo y
 
     def __init__(self, port, baudrate):
         self.ser = serial.Serial(port, baudrate=baudrate)
@@ -68,6 +76,27 @@ class SerialControllerInterface:
             logging.info("- KeyUp \n")
             self.j.set_button(self.mapping.button[buttonId], 0)  
 
+    # EXTRA ---
+    def input_vjoy_values(self, x , y):
+        logging.info("JOYSTICK")
+        logging.info(x,y)
+
+        if x == b'0':
+            self.j.set_button(self.mapping.button['ME'], 0)  
+            self.j.set_button(self.mapping.button['MD'], 0) 
+        if y == b'0':
+            self.j.set_button(self.mapping.button['MC'], 0)              
+            self.j.set_button(self.mapping.button['MB'], 0)  
+            
+        if x == b'e':
+            self.j.set_button(self.mapping.button['ME'], 1)   
+        if x == b'd':
+            self.j.set_button(self.mapping.button['ME'], 1)   
+        if y== b'c':
+            self.j.set_button(self.mapping.button['MC'], 1) 
+        if y== b'b':
+            self.j.set_button(self.mapping.button['MC'], 1) 
+
     def update(self):
 
         ## Sync protocol
@@ -90,6 +119,12 @@ class SerialControllerInterface:
                 self.input_digital_action('A', status)
             if(id_state == b'B'):
                 self.input_digital_action('B', status)
+            
+            # EXTRA ---  Vjoy button:
+            if(id_state == b'J'):
+                self.input_digital_action('ENTER', status)
+
+
         print(data_type)
 
         # Analogic value
@@ -101,6 +136,10 @@ class SerialControllerInterface:
                 self.input_analog_action('d')
             elif(id_state == b's'):
                 self.input_analog_action('s')
+
+        # EXTRA   ------------  Joystick Values
+        if(data_type == b'J'):
+            self.input_vjoy_values(id_state, status)
                 
         self.incoming = self.ser.read()
 

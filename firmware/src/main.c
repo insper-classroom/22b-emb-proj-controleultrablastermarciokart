@@ -13,11 +13,25 @@
 /************************************************************************/
 /* defines                                                              */
 /************************************************************************/
+// ------------------ EXTRA ------------------------
 
 // Acelera Ré PD30 AFEC
+// x do Joystick
 #define AFEC_POT AFEC0
 #define AFEC_POT_ID ID_AFEC0
 #define AFEC_POT_CHANNEL 0 
+
+// y do joystick PC13
+#define AFEC1_POT AFEC1
+#define AFEC1_POT_ID ID_AFEC1
+#define AFEC1_POT_CHANNEL 1   
+
+// BOTAO PD20
+#define BUT_JOY_PIO    PIOD       
+#define BUT_JOY_PIO_ID ID_PIOD
+#define BUT_JOY_IDX 20
+#define BUT_JOY_IDX_MASK (1 << BUT_JOY_IDX)
+// -------------------------------------------------
 
 // Botão AZUL protoboard PA2
 #define BUT1_PIO      PIOA
@@ -70,6 +84,14 @@ QueueHandle_t xQueueKeyDown;
 QueueHandle_t xQueueAfec;
 QueueHandle_t xQueuePot;
 
+// --------------- EXTRA -----------------
+
+QueueHandle_t xQueueAfecX;
+QueueHandle_t xQueueAfecY;
+QueueHandle_t xQueueJoy;
+
+// ---------------------------------------
+
 // Semaforosx
 SemaphoreHandle_t xSemaphoreOnOff;
 
@@ -88,6 +110,8 @@ extern void vApplicationIdleHook(void);
 extern void vApplicationTickHook(void);
 extern void vApplicationMallocFailedHook(void);
 extern void xPortSysTickHandler(void);
+
+void but_interrupt_config(Pio *p_pio , uint32_t pio_id, const uint32_t ul_mask , uint32_t priority);
 
 /************************************************************************/
 /* RTOS application HOOK                                                */
@@ -113,6 +137,22 @@ extern void vApplicationMallocFailedHook(void) {
 /************************************************************************/
 /* handlers / callbacks                                                 */
 /************************************************************************/
+
+// ---------------- EXTRA ----------------
+void but_joy_callback(void){
+	// Indica que o botao vjoy foi pressionado
+	char butId = 'Y';
+	// Indica que o botão verde foi pressionado:
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	if(!pio_get(BUT_JOY_PIO, PIO_INPUT, BUT_JOY_IDX_MASK)){
+		xQueueSendFromISR(xQueueKeyDown, &butId , &xHigherPriorityTaskWoken);
+	}else{
+		// Borda de descida (Soltou):
+		xQueueSendFromISR(xQueueKeyUp, &butId , &xHigherPriorityTaskWoken);
+	}
+}
+
+// ---------------------------------------
 
 void but_on_off_callback(void){
 	// Indica que o botão onoff foi pressionado:
@@ -151,6 +191,8 @@ void but2_callback(void)
 	}
 }
 
+// -------------------------------- EXTRA -----------------------------------------
+
 void TC1_Handler(void) {
 	volatile uint32_t ul_dummy;
 
@@ -159,7 +201,40 @@ void TC1_Handler(void) {
 	/* Avoid compiler warning */
 	UNUSED(ul_dummy);
 
-	/* Selecina canal e inicializa conversão */
+	/* Selecina canal e inicializa conversão*/ 
+	afec_channel_enable(AFEC_POT, AFEC_POT_CHANNEL);
+	afec_start_software_conversion(AFEC_POT);
+	
+	afec_channel_enable(AFEC1_POT, AFEC1_POT_CHANNEL);
+	afec_start_software_conversion(AFEC1_POT);
+}
+
+static void AFEC_Joy_Callback(void) {
+	int value = afec_channel_get_value(AFEC_POT, AFEC_POT_CHANNEL);
+	
+	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
+	xQueueSendFromISR(xQueueAfecX, &value , &xHigherPriorityTaskWoken);
+}
+
+
+static void AFEC1_Joy_Callback (void){
+	int value = afec_channel_get_value(AFEC1_POT, AFEC1_POT_CHANNEL);
+	
+	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
+	xQueueSendFromISR(xQueueAfecY, &value , &xHigherPriorityTaskWoken);
+}
+// --------------------------------------------------------------------------------
+
+/* COMENTADO PARA JOYSTICK
+void TC1_Handler(void) {
+	volatile uint32_t ul_dummy;
+
+	ul_dummy = tc_get_status(TC0, 1);
+
+	/* Avoid compiler warning 
+	UNUSED(ul_dummy);
+
+	/* Selecina canal e inicializa conversão 
 	afec_channel_enable(AFEC_POT, AFEC_POT_CHANNEL);
 	afec_start_software_conversion(AFEC_POT);
 }
@@ -168,7 +243,7 @@ static void AFEC_pot_Callback(void) {
 	int value = afec_channel_get_value(AFEC_POT, AFEC_POT_CHANNEL);
 	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
 	xQueueSendFromISR(xQueueAfec, &value , &xHigherPriorityTaskWoken);
-}
+}*/
 
 /************************************************************************/
 /* funcoes                                                              */
@@ -178,6 +253,21 @@ void led_config(void){
 	pmc_enable_periph_clk(LED_PIO_ID);
 	pio_set_output(LED_PIO, LED_IDX_MASK, 0, 0, 0);
 }
+
+// ------------------ EXTRA ------------------
+void but_vjoy_config(void){
+	pmc_enable_periph_clk(BUT_JOY_PIO_ID);
+	pio_configure(BUT_JOY_PIO, PIO_INPUT, BUT_JOY_IDX_MASK,  PIO_PULLUP | PIO_DEBOUNCE);
+	pio_set_debounce_filter(BUT_JOY_PIO, BUT_JOY_IDX_MASK, 80);
+	
+	pio_handler_set(BUT_JOY_PIO,
+					BUT_JOY_PIO_ID,
+					BUT_JOY_IDX_MASK,
+					PIO_IT_EDGE,
+					but_joy_callback);
+	but_interrupt_config(BUT_JOY_PIO, BUT_JOY_PIO_ID, BUT_JOY_IDX_MASK, 4);
+}
+// ------------------------------------------
 
 void buts_config(void){
 	
@@ -426,11 +516,14 @@ void send_package(char tipo, char id , char status ){
 /* TASKS                                                                */
 /************************************************************************/
 
+// NAO UTILIZADA POR ENQUANTO:
 void task_potenciometro(void){
 	printf("Task potenciometro started \n");
 	
 	// configura ADC e TC para controlar a leitura
-	config_AFEC_pot(AFEC_POT, AFEC_POT_ID, AFEC_POT_CHANNEL, AFEC_pot_Callback);
+	
+	// ------------- COMENTADO POR CONTA DE JOYSTICK:
+	// config_AFEC_pot(AFEC_POT, AFEC_POT_ID, AFEC_POT_CHANNEL, AFEC_pot_Callback);
 	TC_init(TC0, ID_TC1, 1, 10);
 	tc_start(TC0, 1);
 	
@@ -478,10 +571,103 @@ void task_potenciometro(void){
 	
 }
 
+// -------------------- EXTRA ----------------------------------
+
+typedef struct {
+	char eixo_x;
+	char eixo_y;
+} joyData;
+
+
+void task_joystick(void){
+
+	printf("\n joystick\n");
+	
+	// configura ADC e TC para controlar a leitura
+	config_AFEC_pot(AFEC_POT, AFEC_POT_ID, AFEC_POT_CHANNEL, AFEC_Joy_Callback);
+	config_AFEC_pot(AFEC1_POT, AFEC1_POT_ID, AFEC1_POT_CHANNEL, AFEC1_Joy_Callback);
+	but_vjoy_config();
+	TC_init(TC0, ID_TC1, 1, 10);
+	tc_start(TC0, 1);
+	
+	uint32_t value;
+	
+	joyData data;
+	data.eixo_x = '0';
+	data.eixo_y  = '0';
+	
+	uint32_t send;
+	
+	while(1){
+		
+		if(xQueueReceive(xQueueAfecX , &(value) , 0)){
+			if(value < 50){
+				
+				if(data.eixo_x != 'e'){
+					// Moveu para a esquerda
+					data.eixo_x = 'e';
+					send = 1;
+				}
+				
+			}else if (value > 4090){
+				if(data.eixo_x != 'd'){
+					// Moveu para a direita
+					data.eixo_x = 'd';
+					send = 1;
+				}
+			}else{
+				if(data.eixo_x != '0'){
+					// Não mexeu
+					data.eixo_x = '0';
+					send = 1;
+				}
+			}
+		}
+		
+		if(xQueueReceive(xQueueAfecY , &(value) , 0)){
+			if(value < 50){
+				
+				if(data.eixo_y != 'c'){
+					// Moveu para cima
+					data.eixo_y = 'c';
+					send = 1;
+				}
+				
+				}else if (value > 4090){
+				if(data.eixo_y != 'b'){
+					// Moveu para a baixo
+					data.eixo_y = 'b';
+					send = 1;
+				}
+				}else{
+				if(data.eixo_y != '0'){
+					// Não mexeu
+					data.eixo_y = '0';
+					send = 1;
+				}
+			}
+		}
+		
+		if(send){
+			
+			//printf(" X , Y : %c %c\n" , data.eixo_x , data.eixo_y);
+			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+			xQueueSend(xQueueJoy, &data,  &xHigherPriorityTaskWoken);
+			send = 0;
+			
+		}
+		
+	}
+	
+}
+
+
+// --------------------------------------------------------------
+
 void task_main(void) {
 	
-	printf("Task main started \n");
-	printf("Inicializando HC05 \n");
+	printf("\n Task main started \n");
+	printf("\n Inicializando HC05 \n");
 	config_usart0();
 	hc05_init();
 
@@ -498,6 +684,9 @@ void task_main(void) {
 	
 	int send = 0;
 	int firstTime = 1;
+	
+	// -------------- EXTRA : 
+	joyData datajoy;
 
 	//                PROTOCOLO
 	// ----------------------------------------------
@@ -510,6 +699,12 @@ void task_main(void) {
 	// tipo = 'H'
 	// id_botao = '0'
 	// status = '0' (antes ligado) '1' (antes desigado)
+	
+	//                VJOY DATA
+	// ---------------------------------------------
+	// tipo = 'J'
+	// id_botao = info eixo x
+	// status = info eixo y
 	
 	while(1) {
 		
@@ -534,6 +729,16 @@ void task_main(void) {
 				send_package('A', speed_state , '0');
 			}
 		}
+		
+		// ------------------- EXTRA ----------------------------
+		
+		if(xQueueReceive(xQueueJoy, &datajoy , 0)){
+			if(handshake == '1'){
+				send_package('J', datajoy.eixo_x, datajoy.eixo_y);
+			}
+		}
+	
+		// ------------------------------------------------------
 		
 		// HANDSHAKE
 		if(xSemaphoreTake(xSemaphoreOnOff, 0)){
@@ -576,7 +781,12 @@ int main(void) {
 
 	// Cria task
 	xTaskCreate(task_main, "Main", TASK_MAIN_STACK_SIZE, NULL,	TASK_MAIN_STACK_PRIORITY, NULL);
-	xTaskCreate(task_potenciometro, "Potenciometro", TASK_MAIN_STACK_SIZE, NULL, TASK_MAIN_STACK_PRIORITY, NULL);
+	
+	// ------------------------- EXTRA ----------------------------
+	xTaskCreate(task_joystick , "Joystick" , TASK_MAIN_STACK_SIZE, NULL,  TASK_MAIN_STACK_PRIORITY , NULL);
+	
+	// COMENTA PARA JOYSTICK FUNCIONAR
+	//xTaskCreate(task_potenciometro, "Potenciometro", TASK_MAIN_STACK_SIZE, NULL, TASK_MAIN_STACK_PRIORITY, NULL);
 	
 	// Cria semáforos para verificar quao botão foi apertado:
 	xSemaphoreOnOff = xSemaphoreCreateBinary();
@@ -589,6 +799,12 @@ int main(void) {
 	xQueueKeyDown = xQueueCreate(100, sizeof(char));
 	xQueueAfec = xQueueCreate(100, sizeof(uint32_t));
 	xQueuePot = xQueueCreate(100, sizeof(char));
+	
+	// ------------------ EXTRA -----------------------
+	xQueueAfecX = xQueueCreate(100, sizeof(uint32_t));
+	xQueueAfecY = xQueueCreate(100, sizeof(uint32_t));
+	xQueueJoy = xQueueCreate(100, sizeof(joyData));
+	// ------------------------------------------------
 	
 	if (xQueueKeyUp == NULL || xQueueKeyDown == NULL || xQueueAfec == NULL || xQueuePot == NULL )
 		printf("falha em criar fila \n");
